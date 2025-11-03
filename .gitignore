@@ -1,0 +1,80 @@
+# Variables de entorno con credenciales de MongoDB Atlas
+.env
+.env.local
+.env.development
+.env.production
+
+# Dependencias de Node.js 
+node_modules/
+
+#  Archivos de Node.js
+
+# Logs de npm y errores
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Caché de npm
+.npm
+.eslintcache
+
+#  MongoDB
+
+# Archivos de base de datos local 
+*.db
+data/
+mongodb/
+dump/
+
+#  Archivos del Sistema Operativo
+
+# Windows
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+._*
+
+# Linux
+*~
+.directory
+
+#  Visual Studio Code
+
+.vscode/
+*.code-workspace
+
+# Archivos de tu proyecto específico
+
+# Archivos de test que creaste
+test-api.sh
+
+# Documentación temporal o borrador
+INICIO_RAPIDO.md
+*.draft.md
+
+# Archivos de respaldo
+*.bak
+*.backup
+*.old
+*.tmp
+
+
+#  Archivos públicos/uploads
+
+public/uploads/
+uploads/
+
+# Thumbnails generados
+public/thumbnails/
+
+#  Archivos temporales
+
+*.swp
+*.swo
+.cache/
+.temp/

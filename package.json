@@ -1,0 +1,41 @@
+{
+  "name": "ecommerce-api-mongodb",
+  "version": "3.0.0",
+  "description": "API E-commerce profesional con MongoDB, paginación, filtros y vistas completas",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "test": "echo \"Tests en desarrollo\" && exit 0"
+  },
+  "keywords": [
+    "ecommerce",
+    "api",
+    "express",
+    "nodejs",
+    "mongodb",
+    "mongoose",
+    "websockets",
+    "handlebars",
+    "socket.io",
+    "pagination",
+    "rest-api"
+  ],
+  "author": "Juan Acosta",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "express-handlebars": "^7.1.2",
+    "mongoose": "^8.0.3",
+    "mongoose-paginate-v2": "^1.8.0",
+    "socket.io": "^4.6.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  }
+}

@@ -1,0 +1,34 @@
+<div class="content">
+    {{#if hasProducts}}
+        <div class="products-grid">
+            {{#each products}}
+            <div class="product-card">
+                <h3>{{this.title}}</h3>
+                <p>{{this.description}}</p>
+                <p><strong>Código:</strong> {{this.code}}</p>
+                <div class="product-price">${{this.price}}</div>
+                <span class="product-stock {{#if this.stock}}in-stock{{else}}out-of-stock{{/if}}">
+                    {{#if this.stock}}
+                        Stock: {{this.stock}} unidades
+                    {{else}}
+                        Sin stock
+                    {{/if}}
+                </span>
+                <span class="product-category">{{this.category}}</span>
+                <p style="margin-top: 10px;">
+                    <strong>Estado:</strong> 
+                    {{#if this.status}}
+                        <span style="color: green;">✓ Disponible</span>
+                    {{else}}
+                        <span style="color: red;">✗ No disponible</span>
+                    {{/if}}
+                </p>
+            </div>
+            {{/each}}
+        </div>
+    {{#else}}
+        <div class="no-products">
+            <p>📦 No hay productos disponibles en este momento.</p>
+        </div>
+    {{/if}}
+</div>

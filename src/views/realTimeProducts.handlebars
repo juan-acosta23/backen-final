@@ -1,0 +1,169 @@
+<div class="content">
+    <div class="form-container" style="background: #f8f9fa; padding: 25px; border-radius: 10px; margin-bottom: 30px;">
+        <h2 style="color: #333; margin-bottom: 20px;">Agregar Nuevo Producto</h2>
+        <form id="addProductForm">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div>
+                    <label style="display: block; margin-bottom: 5px; color: #555; font-weight: bold;">Título:</label>
+                    <input type="text" id="title" required style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; color: #555; font-weight: bold;">Código:</label>
+                    <input type="text" id="code" required style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; color: #555; font-weight: bold;">Precio:</label>
+                    <input type="number" id="price" step="0.01" required style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; color: #555; font-weight: bold;">Stock:</label>
+                    <input type="number" id="stock" required style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; color: #555; font-weight: bold;">Categoría:</label>
+                    <input type="text" id="category" required style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 5px; color: #555; font-weight: bold;">Estado:</label>
+                    <select id="status" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px;">
+                        <option value="true">Disponible</option>
+                        <option value="false">No disponible</option>
+                    </select>
+                </div>
+            </div>
+            <div style="margin-top: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #555; font-weight: bold;">Descripción:</label>
+                <textarea id="description" required rows="3" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px;"></textarea>
+            </div>
+            <button type="submit" style="margin-top: 15px; background: #28a745; color: white; border: none; padding: 12px 30px; border-radius: 5px; cursor: pointer; font-size: 1rem; font-weight: bold;">
+                Agregar Producto
+            </button>
+        </form>
+        <div id="message" style="margin-top: 15px; padding: 10px; border-radius: 5px; display: none;"></div>
+    </div>
+
+    <h2 style="color: #333; margin-bottom: 20px;">Productos (Actualización en Tiempo Real)</h2>
+    <div id="productsContainer" class="products-grid">
+        {{#if hasProducts}}
+            {{#each products}}
+            <div class="product-card" data-id="{{this.id}}">
+                <h3>{{this.title}}</h3>
+                <p>{{this.description}}</p>
+                <p><strong>Código:</strong> {{this.code}}</p>
+                <div class="product-price">${{this.price}}</div>
+                <span class="product-stock {{#if this.stock}}in-stock{{else}}out-of-stock{{/if}}">
+                    {{#if this.stock}}
+                        Stock: {{this.stock}} unidades
+                    {{else}}
+                        Sin stock
+                    {{/if}}
+                </span>
+                <span class="product-category">{{this.category}}</span>
+                <p style="margin-top: 10px;">
+                    <strong>Estado:</strong> 
+                    {{#if this.status}}
+                        <span style="color: green;">✓ Disponible</span>
+                    {{else}}
+                        <span style="color: red;">✗ No disponible</span>
+                    {{/if}}
+                </p>
+                <button class="delete-btn" onclick="deleteProduct({{this.id}})">Eliminar</button>
+            </div>
+            {{/each}}
+        {{else}}
+            <div class="no-products">
+                <p>📦 No hay productos disponibles en este momento.</p>
+            </div>
+        {{/if}}
+    </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io();
+    
+    socket.on('products', (products) => {
+        updateProductsList(products);
+    });
+    
+    document.getElementById('addProductForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const productData = {
+            title: document.getElementById('title').value,
+            description: document.getElementById('description').value,
+            code: document.getElementById('code').value,
+            price: parseFloat(document.getElementById('price').value),
+            stock: parseInt(document.getElementById('stock').value),
+            category: document.getElementById('category').value,
+            status: document.getElementById('status').value === 'true'
+        };
+        
+        socket.emit('addProduct', productData);
+    });
+    
+    socket.on('productAdded', (response) => {
+        showMessage(response.message, 'success');
+        document.getElementById('addProductForm').reset();
+    });
+    
+    socket.on('productDeleted', (response) => {
+        showMessage(response.message, 'success');
+    });
+    
+    socket.on('productError', (response) => {
+        showMessage(response.message, 'error');
+    });
+    
+    function deleteProduct(id) {
+        if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+            socket.emit('deleteProduct', id);
+        }
+    }
+    
+    function updateProductsList(products) {
+        const container = document.getElementById('productsContainer');
+        
+        if (products.length === 0) {
+            container.innerHTML = `
+                <div class="no-products">
+                    <p>📦 No hay productos disponibles en este momento.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = products.map(product => `
+            <div class="product-card" data-id="${product.id}">
+                <h3>${product.title}</h3>
+                <p>${product.description}</p>
+                <p><strong>Código:</strong> ${product.code}</p>
+                <div class="product-price">$${product.price}</div>
+                <span class="product-stock ${product.stock > 0 ? 'in-stock' : 'out-of-stock'}">
+                    ${product.stock > 0 ? `Stock: ${product.stock} unidades` : 'Sin stock'}
+                </span>
+                <span class="product-category">${product.category}</span>
+                <p style="margin-top: 10px;">
+                    <strong>Estado:</strong> 
+                    ${product.status ? 
+                        '<span style="color: green;">✓ Disponible</span>' : 
+                        '<span style="color: red;">✗ No disponible</span>'}
+                </p>
+                <button class="delete-btn" onclick="deleteProduct(${product.id})">Eliminar</button>
+            </div>
+        `).join('');
+    }
+    
+    function showMessage(message, type) {
+        const messageDiv = document.getElementById('message');
+        messageDiv.textContent = message;
+        messageDiv.style.display = 'block';
+        messageDiv.style.background = type === 'success' ? '#d4edda' : '#f8d7da';
+        messageDiv.style.color = type === 'success' ? '#155724' : '#721c24';
+        messageDiv.style.border = `2px solid ${type === 'success' ? '#c3e6cb' : '#f5c6cb'}`;
+        
+        setTimeout(() => {
+            messageDiv.style.display = 'none';
+        }, 5000);
+    }
+</script>

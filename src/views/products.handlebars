@@ -1,0 +1,217 @@
+<div class="content">
+    <!-- Filtros y ordenamiento -->
+    <div class="filters-container" style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+        <h2 style="color: #333; margin-bottom: 15px;">🔍 Filtros</h2>
+        <form method="GET" action="/products" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            <div>
+                <label style="display: block; margin-bottom: 5px; color: #555; font-weight: bold;">Buscar (Categoría o Disponibilidad):</label>
+                <input type="text" name="query" value="{{currentQuery}}" placeholder="Ej: Laptops, true, disponible" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px; box-sizing: border-box;">
+                <small style="color: #666; font-size: 0.85rem;">Busca por categoría o disponibilidad (true/false/disponible)</small>
+            </div>
+            
+            <div>
+                <label style="display: block; margin-bottom: 5px; color: #555; font-weight: bold;">Categoría:</label>
+                <select name="category" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px;">
+                    <option value="">Todas las categorías</option>
+                    {{#each categories}}
+                    <option value="{{this}}" {{#if (eq this ../currentCategory)}}selected{{/if}}>{{this}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            
+            <div>
+                <label style="display: block; margin-bottom: 5px; color: #555; font-weight: bold;">Disponibilidad:</label>
+                <select name="status" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px;">
+                    <option value="">Todos</option>
+                    <option value="true" {{#if (eq currentStatus "true")}}selected{{/if}}>Disponibles</option>
+                    <option value="false" {{#if (eq currentStatus "false")}}selected{{/if}}>No disponibles</option>
+                </select>
+            </div>
+            
+            <div>
+                <label style="display: block; margin-bottom: 5px; color: #555; font-weight: bold;">Ordenar por precio:</label>
+                <select name="sort" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px;">
+                    <option value="">Sin ordenar</option>
+                    <option value="asc" {{#if (eq currentSort "asc")}}selected{{/if}}>Menor a mayor ↑</option>
+                    <option value="desc" {{#if (eq currentSort "desc")}}selected{{/if}}>Mayor a menor ↓</option>
+                </select>
+            </div>
+            
+            <div>
+                <label style="display: block; margin-bottom: 5px; color: #555; font-weight: bold;">Por página:</label>
+                <select name="limit" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px;">
+                    <option value="5" {{#if (eq limit 5)}}selected{{/if}}>5</option>
+                    <option value="10" {{#if (eq limit 10)}}selected{{/if}}>10</option>
+                    <option value="20" {{#if (eq limit 20)}}selected{{/if}}>20</option>
+                    <option value="50" {{#if (eq limit 50)}}selected{{/if}}>50</option>
+                </select>
+            </div>
+            
+            <div style="display: flex; align-items: flex-end;">
+                <button type="submit" style="width: 100%; padding: 10px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: background 0.3s;">
+                    Aplicar Filtros
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Lista de productos -->
+    {{#if hasProducts}}
+        <div class="products-grid">
+            {{#each products}}
+            <div class="product-card">
+                <h3>{{this.title}}</h3>
+                <p style="font-size: 0.9rem; color: #666; min-height: 60px;">{{this.description}}</p>
+                <p style="font-size: 0.85rem;"><strong>Código:</strong> <code>{{this.code}}</code></p>
+                <div class="product-price">${{this.price}}</div>
+                <span class="product-stock {{#if this.stock}}in-stock{{else}}out-of-stock{{/if}}">
+                    {{#if this.stock}}
+                        📦 Stock: {{this.stock}} unidades
+                    {{else}}
+                        ❌ Sin stock
+                    {{/if}}
+                </span>
+                <span class="product-category">{{this.category}}</span>
+                <p style="margin-top: 10px; font-size: 0.9rem;">
+                    <strong>Estado:</strong> 
+                    {{#if this.status}}
+                        <span style="color: green;">✓ Disponible</span>
+                    {{else}}
+                        <span style="color: red;">✗ No disponible</span>
+                    {{/if}}
+                </p>
+                <div style="margin-top: 15px; display: flex; gap: 10px;">
+                    <a href="/products/{{this._id}}" class="btn-detail" style="flex: 1; text-align: center; padding: 10px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; transition: background 0.3s;">
+                        Ver Detalle
+                    </a>
+                    {{#if this.status}}
+                    {{#if this.stock}}
+                    <button onclick="addToCart('{{this._id}}')" class="btn-add-cart" style="flex: 1; padding: 10px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: background 0.3s;">
+                        🛒 Agregar
+                    </button>
+                    {{/if}}
+                    {{/if}}
+                </div>
+            </div>
+            {{/each}}
+        </div>
+
+        <!-- Paginación -->
+        <div class="pagination" style="display: flex; justify-content: center; align-items: center; margin-top: 30px; gap: 15px; flex-wrap: wrap;">
+            {{#if hasPrevPage}}
+            <a href="{{prevLink}}" style="padding: 12px 24px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; transition: background 0.3s;">
+                ← Anterior
+            </a>
+            {{else}}
+            <span style="padding: 12px 24px; background: #ccc; color: #666; border-radius: 5px; font-weight: bold;">
+                ← Anterior
+            </span>
+            {{/if}}
+            
+            <span style="padding: 12px 24px; background: #f8f9fa; border: 2px solid #667eea; border-radius: 5px; font-weight: bold; color: #667eea;">
+                Página {{page}} de {{totalPages}}
+            </span>
+            
+            {{#if hasNextPage}}
+            <a href="{{nextLink}}" style="padding: 12px 24px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; transition: background 0.3s;">
+                Siguiente →
+            </a>
+            {{else}}
+            <span style="padding: 12px 24px; background: #ccc; color: #666; border-radius: 5px; font-weight: bold;">
+                Siguiente →
+            </span>
+            {{/if}}
+        </div>
+    {{else}}
+        <div class="no-products">
+            <p style="font-size: 3rem; margin-bottom: 20px;">📦</p>
+            <p style="font-size: 1.2rem; color: #666;">No hay productos disponibles con los filtros aplicados.</p>
+            <a href="/products" style="display: inline-block; margin-top: 20px; padding: 12px 24px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                Ver todos los productos
+            </a>
+        </div>
+    {{/if}}
+</div>
+
+<!-- Notificación flotante -->
+<div id="notification" style="position: fixed; top: 20px; right: 20px; padding: 15px 25px; background: #28a745; color: white; border-radius: 5px; display: none; z-index: 1000; box-shadow: 0 3px 10px rgba(0,0,0,0.3); font-weight: bold;"></div>
+
+<script>
+    // Obtener el ID del carrito desde localStorage o usar uno por defecto
+    let cartId = localStorage.getItem('cartId');
+    
+    // Función para actualizar enlace al carrito
+    function updateCartLink() {
+        const cartLink = document.getElementById('cartLink');
+        if (cartId && cartLink) {
+            cartLink.href = `/carts/${cartId}`;
+            cartLink.style.display = 'inline-block';
+        }
+    }
+    
+    // Si no hay carrito, crear uno
+    if (!cartId) {
+        fetch('/api/carts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                cartId = data.payload._id;
+                localStorage.setItem('cartId', cartId);
+                console.log('Carrito creado:', cartId);
+                updateCartLink();
+            }
+        })
+        .catch(err => console.error('Error creando carrito:', err));
+    } else {
+        updateCartLink();
+    }
+    
+    function addToCart(productId) {
+        if (!cartId) {
+            showNotification('❌ Error: No se pudo crear el carrito', 'error');
+            return;
+        }
+        
+        fetch(`/api/carts/${cartId}/product/${productId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showNotification('✓ Producto agregado al carrito', 'success');
+                updateCartLink();
+            } else {
+                showNotification('✗ ' + data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('✗ Error al agregar producto', 'error');
+        });
+    }
+    
+    function showNotification(message, type) {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.style.background = type === 'success' ? '#28a745' : '#dc3545';
+        notification.style.display = 'block';
+        
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 3000);
+    }
+
+    // Hover effects
+    document.querySelectorAll('.btn-detail, .btn-add-cart').forEach(btn => {
+        btn.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.05)';
+        });
+        btn.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+</script>

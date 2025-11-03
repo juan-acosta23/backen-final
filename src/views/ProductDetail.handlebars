@@ -1,0 +1,169 @@
+<div class="content">
+    <div style="margin-bottom: 20px;">
+        <a href="/products" style="display: inline-block; padding: 10px 20px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
+            ← Volver a productos
+        </a>
+    </div>
+
+    <div class="product-detail" style="background: #f8f9fa; border-radius: 10px; padding: 30px; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+            <!-- Imagen del producto -->
+            <div>
+                <div style="background: white; border-radius: 10px; padding: 20px; min-height: 300px; display: flex; align-items: center; justify-content: center;">
+                    <div style="text-align: center; color: #999; font-size: 8rem;">📦</div>
+                </div>
+            </div>
+
+            <!-- Información del producto -->
+            <div>
+                <h1 style="color: #333; margin-bottom: 15px; font-size: 2rem;">{{product.title}}</h1>
+                
+                <span class="product-category" style="display: inline-block; background: #764ba2; color: white; padding: 5px 15px; border-radius: 15px; font-size: 0.9rem; margin-bottom: 20px;">
+                    {{product.category}}
+                </span>
+                
+                <div class="product-price" style="color: #667eea; font-size: 2.5rem; font-weight: bold; margin: 20px 0;">
+                    ${{product.price}}
+                </div>
+                
+                <div style="margin: 20px 0;">
+                    <p style="color: #666; line-height: 1.8; font-size: 1.1rem;">{{product.description}}</p>
+                </div>
+                
+                <div style="background: white; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <div style="margin-bottom: 15px;">
+                        <strong style="color: #555;">Código:</strong> 
+                        <span style="color: #333; font-family: monospace; background: #f8f9fa; padding: 2px 8px; border-radius: 3px;">{{product.code}}</span>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <strong style="color: #555;">Estado:</strong> 
+                        {{#if product.status}}
+                            <span style="color: #28a745; font-weight: bold;">✓ Disponible</span>
+                        {{else}}
+                            <span style="color: #dc3545; font-weight: bold;">✗ No disponible</span>
+                        {{/if}}
+                    </div>
+                    
+                    <div>
+                        <strong style="color: #555;">Stock:</strong> 
+                        <span class="product-stock {{#if product.stock}}in-stock{{else}}out-of-stock{{/if}}" style="display: inline-block; padding: 5px 15px; border-radius: 5px; font-weight: bold;">
+                            {{#if product.stock}}
+                                📦 {{product.stock}} unidades disponibles
+                            {{else}}
+                                ❌ Sin stock
+                            {{/if}}
+                        </span>
+                    </div>
+                </div>
+                
+                {{#if product.status}}
+                {{#if product.stock}}
+                <div style="margin-top: 30px;">
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+                        <label style="font-weight: bold; color: #555;">Cantidad:</label>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <button onclick="decreaseQuantity()" style="width: 40px; height: 40px; background: #f8f9fa; border: 2px solid #ddd; border-radius: 5px; cursor: pointer; font-size: 1.2rem; font-weight: bold; transition: all 0.3s;">
+                                -
+                            </button>
+                            <input type="number" id="quantity" value="1" min="1" max="{{product.stock}}" style="width: 80px; padding: 10px; text-align: center; border: 2px solid #ddd; border-radius: 5px; font-size: 1rem; font-weight: bold;">
+                            <button onclick="increaseQuantity({{product.stock}})" style="width: 40px; height: 40px; background: #f8f9fa; border: 2px solid #ddd; border-radius: 5px; cursor: pointer; font-size: 1.2rem; font-weight: bold; transition: all 0.3s;">
+                                +
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button onclick="addToCart('{{product._id}}')" style="width: 100%; padding: 15px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1.2rem; font-weight: bold; transition: all 0.3s; box-shadow: 0 2px 5px rgba(40,167,69,0.3);">
+                        🛒 Agregar al Carrito
+                    </button>
+                </div>
+                {{else}}
+                <div style="margin-top: 30px; padding: 15px; background: #f8d7da; border: 2px solid #f5c6cb; border-radius: 5px; text-align: center; color: #721c24;">
+                    <strong>⚠️ Este producto no está disponible en stock</strong>
+                </div>
+                {{/if}}
+                {{else}}
+                <div style="margin-top: 30px; padding: 15px; background: #f8d7da; border: 2px solid #f5c6cb; border-radius: 5px; text-align: center; color: #721c24;">
+                    <strong>⚠️ Este producto no está disponible actualmente</strong>
+                </div>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="notification" style="position: fixed; top: 20px; right: 20px; padding: 15px 25px; background: #28a745; color: white; border-radius: 5px; display: none; z-index: 1000; box-shadow: 0 3px 10px rgba(0,0,0,0.3); font-weight: bold;"></div>
+
+<script>
+    let cartId = localStorage.getItem('cartId');
+    
+    if (!cartId) {
+        fetch('/api/carts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                cartId = data.payload._id;
+                localStorage.setItem('cartId', cartId);
+            }
+        });
+    }
+    
+    function increaseQuantity(maxStock) {
+        const input = document.getElementById('quantity');
+        const currentValue = parseInt(input.value);
+        if (currentValue < maxStock) {
+            input.value = currentValue + 1;
+        }
+    }
+    
+    function decreaseQuantity() {
+        const input = document.getElementById('quantity');
+        const currentValue = parseInt(input.value);
+        if (currentValue > 1) {
+            input.value = currentValue - 1;
+        }
+    }
+    
+    async function addToCart(productId) {
+        const quantity = parseInt(document.getElementById('quantity').value);
+        
+        if (!cartId) {
+            showNotification('❌ Error: No se pudo crear el carrito', 'error');
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/api/carts/${cartId}/product/${productId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ quantity })
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                showNotification(`✓ ${quantity} producto(s) agregado(s) al carrito`, 'success');
+                document.getElementById('quantity').value = 1;
+            } else {
+                showNotification('✗ ' + data.message, 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showNotification('✗ Error al agregar producto al carrito', 'error');
+        }
+    }
+    
+    function showNotification(message, type) {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.style.background = type === 'success' ? '#28a745' : '#dc3545';
+        notification.style.display = 'block';
+        
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 3000);
+    }
+</script>
