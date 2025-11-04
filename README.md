@@ -55,22 +55,6 @@ GET /api/products?category=Laptops&sort=desc
 GET /api/products?query=true&page=2
 ```
 
-La respuesta tiene esta estructura:
-```json
-{
-  "status": "success",
-  "payload": [...],
-  "totalPages": 5,
-  "prevPage": null,
-  "nextPage": 2,
-  "page": 1,
-  "hasPrevPage": false,
-  "hasNextPage": true,
-  "prevLink": null,
-  "nextLink": "/api/products?page=2&limit=10"
-}
-```
-
 **GET /api/products/:pid**
 Obtiene un producto por su ID.
 
@@ -119,19 +103,7 @@ Actualiza solo la cantidad de un producto específico:
 **DELETE /api/carts/:cid**
 Vacía el carrito (elimina todos los productos).
 
-## Vistas Web
 
-**/products**
-Vista principal donde se muestran todos los productos con paginación. Permite filtrar por categoría o disponibilidad, ordenar por precio, agregar productos al carrito y ver el detalle de cada producto.
-
-**/products/:pid**
-Vista de detalle de un producto específico. Muestra toda la información, precio, stock, categoría, y tiene un botón para agregar al carrito con selección de cantidad.
-
-**/carts/:cid**
-Vista del carrito que muestra todos los productos que tiene ese carrito específico, con sus cantidades, subtotales y el total. Permite eliminar productos individuales o vaciar todo el carrito.
-
-**/realtimeproducts**
-Vista que usa WebSockets para actualizar los productos en tiempo real cuando se agregan o eliminan.
 
 ## Requisitos cumplidos
 
@@ -164,12 +136,6 @@ npm run dev    # Modo desarrollo con nodemon
 npm test       # Tests (aún no implementados)
 ```
 
-## Notas
-
-- El proyecto puede usar MongoDB Atlas o MongoDB local según lo que pongas en el .env
-- Los carritos guardan referencias a los productos, no copias de los datos
-- Al iniciar el servidor por primera vez, se cargan algunos productos de ejemplo
-- El carrito se guarda en localStorage del navegador
 
 ## Autor
 
